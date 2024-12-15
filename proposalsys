@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract Voting {
+    struct Proposal {
+        string name;
+        uint256 voteCount;
+    }
+
+    address public owner;
+    mapping(address => bool) public voters;
+    Proposal[] public proposals;
+
+    constructor(string[] memory proposalNames) {
+        owner = msg.sender;
+        for (uint i = 0; i < proposalNames.length; i++) {
+            proposals.push(Proposal({ name: proposalNames[i], voteCount: 0 }));
+        }
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can execute this");
+        _;
+    }
+
+    function vote(uint256 proposalIndex) public {
+        require(!voters[msg.sender], "You have already voted");
+        require(proposalIndex < proposals.length, "Invalid proposal index");
+        voters[msg.sender] = true;
+        proposals[proposalIndex].voteCount += 1;
+    }
+
+    function getProposal(uint256 index) public view returns (string memory, uint256) {
+        require(index < proposals.length, "Invalid index");
+        return (proposals[index].name, proposals[index].voteCount);
+    }
+}
